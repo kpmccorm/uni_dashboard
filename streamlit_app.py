@@ -5,11 +5,17 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+#================================================================================
+
 #app title
 st.title('University Admissions Tracking')
 
-#data load
+#initial data load
 uni_data = pd.read_csv('university_student_dashboard_data.csv')
+
+#================================================================================
+
+#extra features
 uni_data['Admissions Rate (%)'] = round((uni_data['Admitted']/uni_data['Applications'])*100,0).astype(int)
 uni_data['Matriculation Rate (%)'] = round((uni_data['Enrolled']/uni_data['Admitted'])*100,0).astype(int)
 uni_data = uni_data.sort_values(['Year','Term'],ascending=[True,True]) #Sort by year + term
@@ -19,15 +25,34 @@ uni_data['Semester'] =  uni_data['Year'].astype(str) + ' ' +uni_data['Term'] #Cr
 metrics = uni_data[['Year','Term','Semester','Retention Rate (%)','Student Satisfaction (%)']].copy()
 metrics = metrics.melt(id_vars=['Year','Term','Semester'],var_name='Metric',value_name='Value')
 metrics['Metric'] = metrics['Metric'].str.replace(' (%)','')
-
 metrics = metrics.groupby(['Year','Metric']).agg({'Value':'mean'}).reset_index()
-metrics.head()
+
+#Define data for the departments
+##Select columns
+depts = ['Engineering', 'Business', 'Arts', 'Science']
+uni_depts = uni_data[['Year','Term','Enrolled','Engineering Enrolled','Business Enrolled','Arts Enrolled','Science Enrolled']].copy()
+uni_depts = uni_depts.rename(lambda x: x.replace(' Enrolled',''),axis=1)
+
+##Calculate department enrollment shares
+uni_depts['Engineering'] = round(uni_depts['Engineering']/uni_depts['Enrolled'],3)
+uni_depts['Business'] = round(uni_depts['Business']/uni_depts['Enrolled'],3)
+uni_depts['Arts'] = round(uni_depts['Arts']/uni_depts['Enrolled'],3)
+uni_depts['Science'] = round(uni_depts['Science']/uni_depts['Enrolled'],3)
+
+##Unpivot the enrollment fields into longer shape
+uni_depts.drop(columns=['Enrolled'],inplace=True)
+uni_depts = uni_depts.melt(id_vars=['Year','Term'],var_name='Department',value_name='Department Share')
+uni_depts = uni_depts.sort_values('Year',ascending=True).reset_index(drop=True)
+uni_depts['Semester'] =uni_depts['Term']+ ' ' +  uni_depts['Year'].astype(str).str[-2:]
+
+#================================================================================
 
 #App layout
 col1, col2 = st.columns(2)
 
 with col1:
   #============================================================
+  st.header('Tracking Plots')
   #Admissions tracking dashboard
   fig = go.Figure()
 
@@ -121,4 +146,18 @@ with col1:
   #============================================================
 
 with col2:
-  st.write('Column 2')
+  depts_fig = px.bar(uni_depts,x='Semester',y='Department Share',
+             color = 'Department',custom_data = 'Department')
+
+  depts_fig.update_traces(hovertemplate="<br>".join([
+      'Department: %{customdata[0]}',
+      "Semester: %{x}",
+      "Department Share: %{y}"]))
+
+  depts_fig.update_layout(title='Department Enrollment Shares',
+                          title_font_size = 24)
+  depts_fig.update_xaxes(title='Semester',
+                        tickangle=-45)
+  depts_fig.update_yaxes(title='Department Share of Enrollment',
+                        tickformat='0.0%')
+  st.plotly_chart(depts_fig,use_container_width=True)
