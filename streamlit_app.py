@@ -9,7 +9,7 @@ import streamlit as st
 st.title('University Admissions Tracking')
 
 #data load
-uni_data = pd.read_csv('/content/university_student_dashboard_data.csv')
+uni_data = pd.read_csv('university_student_dashboard_data.csv')
 uni_data['Admissions Rate (%)'] = round((uni_data['Admitted']/uni_data['Applications'])*100,0).astype(int)
 uni_data['Matriculation Rate (%)'] = round((uni_data['Enrolled']/uni_data['Admitted'])*100,0).astype(int)
 
