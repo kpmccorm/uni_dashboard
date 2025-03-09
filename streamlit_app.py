@@ -6,6 +6,8 @@ import plotly.graph_objects as go
 import streamlit as st
 
 #================================================================================
+#app width
+st.set_page_config(layout="wide")
 
 #app title
 st.title('University Admissions Tracking')
@@ -60,7 +62,7 @@ with col1:
   fig.add_scatter(x=[uni_data['Year'],uni_data['Term']], y=uni_data['Applications'],
                   mode = 'lines',name='Applications',
                   line=dict(width=3),
-                  hovertemplate = 
+                  hovertemplate =
                   '<b>%{x}</b><br>'+
                   '<b># of Applications: </b>%{y}<br>')
   #Admissions line
@@ -68,7 +70,7 @@ with col1:
                   mode = 'lines', name='Admissions',
                   line=dict(width=3),
                   text = uni_data['Admissions Rate (%)'],
-                  hovertemplate=    
+                  hovertemplate=
                   '<b>%{x}</b><br>'+
                   '<b>Admitted Students: </b>%{y}<br>'+
                   '<b>Admissions Rate: </b>%{text}%')
@@ -77,14 +79,16 @@ with col1:
                   mode = 'lines',name='Enrollment',
                   line=dict(width=3),
                   text = uni_data['Matriculation Rate (%)'],
-                  hovertemplate=    
+                  hovertemplate=
                   '<b>%{x}</b><br>'+
                   '<b>Enrolled Students: </b>%{y}<br>'+
                   '<b>Matriculation Rate: </b>%{text}%')
 
   #Add titles and adjust axes
   fig.update_layout(title = 'University Admissions Tracking',
-                    title_font_size = 24)
+                    title_font_size = 24,
+                    width = 600,
+                    height = 400)
   fig.update_xaxes(title = 'Semester',
                   title_font_size = 18)
   fig.update_yaxes(title = 'Number of Students',
@@ -93,7 +97,6 @@ with col1:
 
   st.plotly_chart(fig,use_continer_width=True)
   #============================================================
-
   #Performance Tracking
   metrics_fig1 = go.Figure()
 
@@ -129,7 +132,8 @@ with col1:
       title_font_size=24,
       xaxis=dict(title="Year"),
       yaxis=dict(title="Value"),
-  )
+      width = 600,
+      height = 400)
 
   metrics_fig1.update_traces(hovertemplate="<br>".join([
       "Year: %{x}",
@@ -155,7 +159,9 @@ with col2:
       "Department Share: %{y}"]))
 
   depts_fig.update_layout(title='Department Enrollment Shares',
-                          title_font_size = 24)
+                          title_font_size = 24,
+                          width = 600,
+                          height = 400)
   depts_fig.update_xaxes(title='Semester',
                         tickangle=-45)
   depts_fig.update_yaxes(title='Department Share of Enrollment',
